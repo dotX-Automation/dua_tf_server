@@ -22,13 +22,11 @@
  * limitations under the License.
  */
 
-// TF Server
 #include <dua_tf_server/dua_tf_server.hpp>
 
 namespace dua_tf_server
 {
 
-// Gets the transform between from a source frame to a target frame.
 void TFServerNode::get_transform_callback(
   GetTransform::Request::SharedPtr req,
   GetTransform::Response::SharedPtr resp)
@@ -72,7 +70,6 @@ void TFServerNode::get_transform_callback(
   }
 }
 
-// Transforms a pose from a source frame to a target frame.
 void TFServerNode::transform_pose_callback(
   TransformPose::Request::SharedPtr req,
   TransformPose::Response::SharedPtr resp)

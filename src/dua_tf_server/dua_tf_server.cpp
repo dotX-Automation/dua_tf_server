@@ -27,34 +27,20 @@
 namespace dua_tf_server
 {
 
-/**
- * @brief Constructor
- *
- * @param node_options Options for the base node.
- */
 TFServerNode::TFServerNode(const rclcpp::NodeOptions & node_options)
 : NodeBase("dua_tf_server", node_options, true)
 {
   // Node initialization routines
   init_cgroups();
-  init_subscribers();
-  init_publishers();
   init_service_servers();
-  init_service_clients();
-  init_action_servers();
-  init_action_clients();
-  init_timers();
 
-  // TF2 buffer and listener
+  // tf2 buffer and listener
   tf_buffer_ = std::make_shared<tf2_ros::Buffer>(get_clock());
   tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 
   RCLCPP_WARN(get_logger(), "Node initialized");
 }
 
-/**
- * @brief Routine to initialize callback groups.
- */
 void TFServerNode::init_cgroups()
 {
   // Get Transform
@@ -64,25 +50,6 @@ void TFServerNode::init_cgroups()
   transform_pose_cgroup_ = create_callback_group(rclcpp::CallbackGroupType::Reentrant);
 }
 
-/**
- * @brief Routine to initialize topic subscribers.
- */
-void TFServerNode::init_subscribers()
-{
-  RCLCPP_INFO(get_logger(), "Subscribers:");
-}
-
-/**
- * @brief Routine to initialize topic publishers.
- */
-void TFServerNode::init_publishers()
-{
-  RCLCPP_INFO(get_logger(), "Publishers:");
-}
-
-/**
- * @brief Routine to initialize service servers.
- */
 void TFServerNode::init_service_servers()
 {
   RCLCPP_INFO(get_logger(), "Service servers:");
@@ -112,38 +79,6 @@ void TFServerNode::init_service_servers()
     dua_qos::Reliable::get_datum_qos(),
     transform_pose_cgroup_);
   RCLCPP_INFO(get_logger(), "  - %s", transform_pose_srv.c_str());
-}
-
-/**
- * @brief Routine to initialize service clients.
- */
-void TFServerNode::init_service_clients()
-{
-  RCLCPP_INFO(get_logger(), "Service clients:");
-}
-
-/**
- * @brief Routine to initialize action servers.
- */
-void TFServerNode::init_action_servers()
-{
-  RCLCPP_INFO(get_logger(), "Action servers:");
-}
-
-/**
- * @brief Routine to initialize action clients.
- */
-void TFServerNode::init_action_clients()
-{
-  RCLCPP_INFO(get_logger(), "Action clients:");
-}
-
-/**
- * @brief Routine to initialize timers.
- */
-void TFServerNode::init_timers()
-{
-  RCLCPP_INFO(get_logger(), "Timers:");
 }
 
 } // namespace dua_tf_server

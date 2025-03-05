@@ -22,12 +22,14 @@
  * limitations under the License.
  */
 
-// DUA libraries
+#include <cstdlib>
+
 #include <ros2_app_manager/ros2_app_manager.hpp>
 #include <ros2_signal_handler/ros2_signal_handler.hpp>
 
-// TF Server
 #include <dua_tf_server/dua_tf_server.hpp>
+
+#include <rclcpp/rclcpp.hpp>
 
 int main(int argc, char ** argv)
 {
@@ -59,16 +61,16 @@ int main(int argc, char ** argv)
     RCLCPP_ERROR(
       rclcpp::get_logger("dua_tf_server_app"),
       "Unhandled exception: %s", e.what());
-    return EXIT_FAILURE;
+    exit(EXIT_FAILURE);
   } catch (...) {
     RCLCPP_ERROR(
       rclcpp::get_logger("dua_tf_server_app"),
       "Unhandled exception");
-    return EXIT_FAILURE;
+    exit(EXIT_FAILURE);
   }
 
   // Shutdown the application
   app_manager.shutdown();
   sig_handler.fini();
-  return EXIT_SUCCESS;
+  exit(EXIT_SUCCESS);
 }
