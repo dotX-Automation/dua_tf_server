@@ -69,7 +69,6 @@ public:
 
 private:
   // Node initialization routines
-  void init_tf2();
   void init_cgroups();
   void init_subscribers();
   void init_publishers();
@@ -78,10 +77,6 @@ private:
   void init_action_servers();
   void init_action_clients();
   void init_timers();
-
-  // TF buffer and listener
-  std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
-  std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 
   // Callback groups
   rclcpp::CallbackGroup::SharedPtr get_transform_cgroup_;
@@ -93,10 +88,10 @@ private:
 
   // Service servers
   rclcpp::Service<GetTransform>::SharedPtr get_transform_srv_;
+  rclcpp::Service<TransformPose>::SharedPtr transform_pose_srv_;
   void get_transform_callback(
     GetTransform::Request::SharedPtr req,
     GetTransform::Response::SharedPtr resp);
-  rclcpp::Service<TransformPose>::SharedPtr transform_pose_srv_;
   void transform_pose_callback(
     TransformPose::Request::SharedPtr req,
     TransformPose::Response::SharedPtr resp);
@@ -110,6 +105,8 @@ private:
   // Timer callbacks
 
   // Internal variables
+  std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
+  std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 
   // Utility functions
 };

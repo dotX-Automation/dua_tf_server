@@ -28,11 +28,7 @@
 namespace dua_tf_server
 {
 
-/**
- * @brief Compute the transform between two frames.
- * @param req Request message.
- * @param resp Response message.
- */
+// Gets the transform between from a source frame to a target frame.
 void TFServerNode::get_transform_callback(
   GetTransform::Request::SharedPtr req,
   GetTransform::Response::SharedPtr resp)
@@ -76,11 +72,7 @@ void TFServerNode::get_transform_callback(
   }
 }
 
-/**
- * @brief Compute the transform between two poses.
- * @param req Request message.
- * @param resp Response message.
- */
+// Transforms a pose from a source frame to a target frame.
 void TFServerNode::transform_pose_callback(
   TransformPose::Request::SharedPtr req,
   TransformPose::Response::SharedPtr resp)

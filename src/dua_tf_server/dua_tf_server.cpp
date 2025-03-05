@@ -22,7 +22,6 @@
  * limitations under the License.
  */
 
-// TF Server
 #include <dua_tf_server/dua_tf_server.hpp>
 
 namespace dua_tf_server
@@ -37,7 +36,6 @@ TFServerNode::TFServerNode(const rclcpp::NodeOptions & node_options)
 : NodeBase("dua_tf_server", node_options, true)
 {
   // Node initialization routines
-  init_tf2();
   init_cgroups();
   init_subscribers();
   init_publishers();
@@ -47,16 +45,11 @@ TFServerNode::TFServerNode(const rclcpp::NodeOptions & node_options)
   init_action_clients();
   init_timers();
 
-  RCLCPP_WARN(get_logger(), "Node initialized");
-}
-
-/**
- * @brief Routine to initialize TF listeners.
- */
-void TFServerNode::init_tf2()
-{
+  // TF2 buffer and listener
   tf_buffer_ = std::make_shared<tf2_ros::Buffer>(get_clock());
   tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
+
+  RCLCPP_WARN(get_logger(), "Node initialized");
 }
 
 /**
