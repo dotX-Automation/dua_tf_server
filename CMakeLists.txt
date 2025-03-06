@@ -57,7 +57,7 @@ ament_target_dependencies(dua_tf_server
   "tf2_ros"
   "tf2_geometry_msgs"
 )
-rclcpp_components_register_nodes(dua_tf_server "dua_tf_server::TFServer")
+rclcpp_components_register_nodes(dua_tf_server "dua_tf_server::TFServerNode")
 
 # TF Server app
 add_executable(dua_tf_server_app
