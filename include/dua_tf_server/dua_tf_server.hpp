@@ -22,7 +22,8 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef DUA_TF_SERVER__DUA_TF_SERVER_HPP_
+#define DUA_TF_SERVER__DUA_TF_SERVER_HPP_
 
 #include <dua_node_cpp/dua_node.hpp>
 #include <dua_qos_cpp/dua_qos.hpp>
@@ -114,3 +115,5 @@ private:
 };
 
 } // namespace dua_tf_server
+
+#endif // DUA_TF_SERVER__DUA_TF_SERVER_HPP_
