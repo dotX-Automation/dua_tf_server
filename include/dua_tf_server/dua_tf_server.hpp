@@ -22,8 +22,7 @@
  * limitations under the License.
  */
 
-#ifndef DUA_TF_SERVER__DUA_TF_SERVER_HPP_
-#define DUA_TF_SERVER__DUA_TF_SERVER_HPP_
+#pragma once
 
 #include <dua_node_cpp/dua_node.hpp>
 #include <dua_qos_cpp/dua_qos.hpp>
@@ -74,12 +73,12 @@ private:
   /**
    * @brief Initializes callback groups.
    */
-  void init_cgroups();
+  void init_cgroups() override;
 
   /**
    * @brief Initializes service servers.
    */
-  void init_service_servers();
+  void init_service_servers() override;
 
   /* Callback groups */
   rclcpp::CallbackGroup::SharedPtr get_transform_cgroup_;
@@ -115,5 +114,3 @@ private:
 };
 
 } // namespace dua_tf_server
-
-#endif // DUA_TF_SERVER__DUA_TF_SERVER_HPP_

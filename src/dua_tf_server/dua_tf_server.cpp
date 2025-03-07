@@ -30,55 +30,40 @@ namespace dua_tf_server
 TFServerNode::TFServerNode(const rclcpp::NodeOptions & node_options)
 : NodeBase("dua_tf_server", node_options, true)
 {
-  // Node initialization routines
-  init_cgroups();
-  init_service_servers();
+  dua_init_node();
 
   // tf2 buffer and listener
   tf_buffer_ = std::make_shared<tf2_ros::Buffer>(get_clock());
   tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 
-  RCLCPP_WARN(get_logger(), "Node initialized");
+  RCLCPP_INFO(get_logger(), "Node initialized");
 }
 
 void TFServerNode::init_cgroups()
 {
-  // Get Transform
-  get_transform_cgroup_ = create_callback_group(rclcpp::CallbackGroupType::Reentrant);
-
-  // Transform Pose
-  transform_pose_cgroup_ = create_callback_group(rclcpp::CallbackGroupType::Reentrant);
+  get_transform_cgroup_ = dua_create_reentrant_cgroup();
+  transform_pose_cgroup_ = dua_create_reentrant_cgroup();
 }
 
 void TFServerNode::init_service_servers()
 {
-  RCLCPP_INFO(get_logger(), "Service servers:");
-
-  // Get Transform
-  const std::string get_transform_srv = "~/get_transform";
-  get_transform_srv_ = this->create_service<GetTransform>(
-    get_transform_srv,
+  get_transform_srv_ = dua_create_service_server<GetTransform>(
+    "~/get_transform",
     std::bind(
       &TFServerNode::get_transform_callback,
       this,
       std::placeholders::_1,
       std::placeholders::_2),
-    dua_qos::Reliable::get_datum_qos(),
     get_transform_cgroup_);
-  RCLCPP_INFO(get_logger(), "  - %s", get_transform_srv.c_str());
 
-  // Transform Pose
-  const std::string transform_pose_srv = "~/transform_pose";
-  transform_pose_srv_ = this->create_service<TransformPose>(
-    transform_pose_srv,
+  transform_pose_srv_ = dua_create_service_server<TransformPose>(
+    "~/transform_pose",
     std::bind(
       &TFServerNode::transform_pose_callback,
       this,
       std::placeholders::_1,
       std::placeholders::_2),
-    dua_qos::Reliable::get_datum_qos(),
     transform_pose_cgroup_);
-  RCLCPP_INFO(get_logger(), "  - %s", transform_pose_srv.c_str());
 }
 
 } // namespace dua_tf_server
