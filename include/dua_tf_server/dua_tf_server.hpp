@@ -70,23 +70,54 @@ public:
   ~TFServerNode() = default;
 
 private:
+  // ######################################  Parameters  ###########################################
+  int64_t pose_period_;
+  std::vector<std::string> source_frames_, target_frames_;
+
+  /**
+   * @brief Initializes parameters.
+   */
+  void init_parameters() override;
+
+  // ######################################  Callback groups  ######################################
+  rclcpp::CallbackGroup::SharedPtr pose_cgroup_;
+  rclcpp::CallbackGroup::SharedPtr get_transform_cgroup_;
+  rclcpp::CallbackGroup::SharedPtr transform_pose_cgroup_;
+
   /**
    * @brief Initializes callback groups.
    */
   void init_cgroups() override;
 
+  // ##########################################  Timers  ###########################################
+  rclcpp::TimerBase::SharedPtr pose_timer_;
+
+  /**
+   * @brief Initializes timers.
+   */
+  void init_timers() override;
+
+  /**
+   * @brief Iterates over the list of source and target frames and publishes the poses.
+   */
+  void publish_poses();
+
+  // #####################################  Topic publishers  ######################################
+  std::vector<rclcpp::Publisher<PoseStamped>::SharedPtr> pose_pubs_;
+
+  /**
+   * @brief Initializes publishers.
+   */
+  void init_publishers() override;
+
+  // ######################################  Service servers  ######################################
+  rclcpp::Service<GetTransform>::SharedPtr get_transform_srv_;
+  rclcpp::Service<TransformPose>::SharedPtr transform_pose_srv_;
+
   /**
    * @brief Initializes service servers.
    */
   void init_service_servers() override;
-
-  /* Callback groups */
-  rclcpp::CallbackGroup::SharedPtr get_transform_cgroup_;
-  rclcpp::CallbackGroup::SharedPtr transform_pose_cgroup_;
-
-  /* Service servers */
-  rclcpp::Service<GetTransform>::SharedPtr get_transform_srv_;
-  rclcpp::Service<TransformPose>::SharedPtr transform_pose_srv_;
 
   /**
    * @brief Gets the transform between from a source frame to a target frame.
@@ -108,7 +139,16 @@ private:
     TransformPose::Request::SharedPtr req,
     TransformPose::Response::SharedPtr resp);
 
-  /* Internal variables */
+  // #####################################  Internal methods  ######################################
+  /**
+   * @brief Gets the transform between from a source frame to a target frame.
+   */
+  bool get_transform(
+    const std::string & source_frame, const std::string & target_frame,
+    const rclcpp::Time & time, const rclcpp::Duration & timeout,
+    TransformStamped & transform);
+
+  // ####################################  Internal variables  #####################################
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 };

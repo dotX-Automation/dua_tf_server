@@ -32,7 +32,12 @@ TFServerNode::TFServerNode(const rclcpp::NodeOptions & node_options)
 {
   dua_init_node();
 
-  // tf2 buffer and listener
+  // Check parameters
+  if (source_frames_.size() != target_frames_.size()) {
+    throw std::runtime_error("Source and target frames must have the same size");
+  }
+
+  // Initialize TF buffer and listener
   tf_buffer_ = std::make_shared<tf2_ros::Buffer>(get_clock());
   tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 
@@ -41,12 +46,47 @@ TFServerNode::TFServerNode(const rclcpp::NodeOptions & node_options)
 
 void TFServerNode::init_cgroups()
 {
+  pose_cgroup_ = dua_create_reentrant_cgroup();
   get_transform_cgroup_ = dua_create_reentrant_cgroup();
   transform_pose_cgroup_ = dua_create_reentrant_cgroup();
 }
 
+void TFServerNode::init_timers()
+{
+  // Create a timer to publish the poses
+  pose_timer_ = dua_create_timer(
+    "Pose timer",
+    pose_period_,
+    std::bind(&TFServerNode::publish_poses, this),
+    pose_cgroup_);
+}
+
+void TFServerNode::init_publishers()
+{
+  // Initialize a publisher for each source-target frame pair
+  for (size_t i = 0; i < source_frames_.size(); i++) {
+    // Get the source frame name
+    std::string source_frame = source_frames_[i];
+    size_t source_pos = source_frames_[i].find_last_of("/");
+    if (source_pos != std::string::npos) {
+      source_frame = source_frames_[i].substr(source_pos + 1);
+    }
+    // Get the target frame name
+    std::string target_frame = target_frames_[i];
+    size_t target_pos = target_frames_[i].find_last_of("/");
+    if (target_pos != std::string::npos) {
+      target_frame = target_frames_[i].substr(target_pos + 1);
+    }
+    // Initialize the publisher
+    pose_pubs_.push_back(dua_create_publisher<PoseStamped>(
+      "~/" + source_frame + "_in_" + target_frame,
+      dua_qos::Reliable::get_datum_qos()));
+  }
+}
+
 void TFServerNode::init_service_servers()
 {
+  // Initialize the GetTransform service server
   get_transform_srv_ = dua_create_service_server<GetTransform>(
     "~/get_transform",
     std::bind(
@@ -56,6 +96,7 @@ void TFServerNode::init_service_servers()
       std::placeholders::_2),
     get_transform_cgroup_);
 
+  // Initialize the TransformPose service server
   transform_pose_srv_ = dua_create_service_server<TransformPose>(
     "~/transform_pose",
     std::bind(

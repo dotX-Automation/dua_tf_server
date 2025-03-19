@@ -7,7 +7,7 @@
  */
 
 /**
- * Copyright 2024 dotX Automation s.r.l.
+ * Copyright 2025 dotX Automation s.r.l.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,42 +31,17 @@ void TFServerNode::get_transform_callback(
   GetTransform::Request::SharedPtr req,
   GetTransform::Response::SharedPtr resp)
 {
-  const std::string source_frame = req->source_frame;
-  const std::string target_frame = req->target_frame;
-  const rclcpp::Duration timeout = req->timeout;
-  resp->result.set__result(CommandResultStamped::SUCCESS);
-  rclcpp::Time target_time = req->time;
-  try {
-    if (!tf_buffer_->canTransform(
-        target_frame,
-        source_frame,
-        target_time,
-        timeout))
-    {
+  const std::string & source_frame = req->source_frame;
+  const std::string & target_frame = req->target_frame;
+  const rclcpp::Duration & timeout = req->timeout;
+  if (get_transform(source_frame, target_frame, req->time, timeout, resp->transform)) {
+    resp->result.set__result(CommandResultStamped::SUCCESS);
+  } else {
+    if (get_transform(source_frame, target_frame, rclcpp::Time(), timeout, resp->transform)) {
       resp->result.set__result(CommandResultStamped::FAILED);
-      target_time = rclcpp::Time(0);
-      if (!tf_buffer_->canTransform(
-          target_frame,
-          source_frame,
-          target_time,
-          timeout))
-      {
-        resp->result.set__result(CommandResultStamped::ERROR);
-        RCLCPP_ERROR(
-          get_logger(), "Failed to get transform from %s to %s",
-          source_frame.c_str(), target_frame.c_str());
-        return;
-      }
+    } else {
+      resp->result.set__result(CommandResultStamped::ERROR);
     }
-    resp->transform = tf_buffer_->lookupTransform(
-      target_frame,
-      source_frame,
-      target_time);
-  } catch (const tf2::TransformException & ex) {
-    resp->result.set__result(CommandResultStamped::ERROR);
-    RCLCPP_ERROR(
-      get_logger(), "Failed to get transform from %s to %s",
-      source_frame.c_str(), target_frame.c_str());
   }
 }
 
@@ -74,44 +49,23 @@ void TFServerNode::transform_pose_callback(
   TransformPose::Request::SharedPtr req,
   TransformPose::Response::SharedPtr resp)
 {
-  const std::string source_frame = req->source_pose.header.frame_id;
-  const std::string target_frame = req->target_frame;
-  const rclcpp::Duration timeout = req->timeout;
-  resp->result.set__result(CommandResultStamped::SUCCESS);
-  rclcpp::Time target_time = req->source_pose.header.stamp;
-  try {
-    if (!tf_buffer_->canTransform(
-        target_frame,
-        source_frame,
-        target_time,
-        timeout))
-    {
+  const std::string & source_frame = req->source_pose.header.frame_id;
+  const std::string & target_frame = req->target_frame;
+  const rclcpp::Duration & timeout = req->timeout;
+  TransformStamped transform_msg;
+  if (get_transform(source_frame, target_frame, req->source_pose.header.stamp, timeout,
+      transform_msg))
+  {
+    resp->result.set__result(CommandResultStamped::SUCCESS);
+  } else {
+    if (get_transform(source_frame, target_frame, rclcpp::Time(), timeout, transform_msg)) {
       resp->result.set__result(CommandResultStamped::FAILED);
-      target_time = rclcpp::Time(0);
-      if (!tf_buffer_->canTransform(
-          target_frame,
-          source_frame,
-          target_time,
-          timeout))
-      {
-        resp->result.set__result(CommandResultStamped::ERROR);
-        RCLCPP_ERROR(
-          get_logger(), "Failed to get transform from %s to %s",
-          source_frame.c_str(), target_frame.c_str());
-        return;
-      }
+    } else {
+      resp->result.set__result(CommandResultStamped::ERROR);
+      return;
     }
-    const TransformStamped transform = tf_buffer_->lookupTransform(
-      target_frame,
-      source_frame,
-      target_time);
-    tf2::doTransform(req->source_pose, resp->target_pose, transform);
-  } catch (const tf2::TransformException & ex) {
-    resp->result.set__result(CommandResultStamped::ERROR);
-    RCLCPP_ERROR(
-      get_logger(), "Failed to transform pose from %s to %s",
-      source_frame.c_str(), target_frame.c_str());
   }
+  tf2::doTransform(req->source_pose, resp->target_pose, transform_msg);
 }
 
 } // namespace dua_tf_server

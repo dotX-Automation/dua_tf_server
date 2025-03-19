@@ -8,6 +8,7 @@
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_ros</buildtool_depend>
 
   <depend>dua_app_management</depend>
   <depend>dua_common_interfaces</depend>
@@ -15,6 +16,7 @@
   <depend>dua_node_cpp</depend>
   <depend>dua_qos_cpp</depend>
   <depend>geometry_msgs</depend>
+  <depend>params_manager_cpp</depend>
   <depend>rclcpp</depend>
   <depend>rclcpp_components</depend>
   <depend>std_msgs</depend>

@@ -23,21 +23,20 @@ limitations under the License.
 """
 
 
-import os
-from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, SetEnvironmentVariable
-from launch_ros.actions import Node
+from launch_ros.descriptions import ComposableNode
+from launch_ros.actions import ComposableNodeContainer, Node
 from launch.substitutions import LaunchConfiguration
-from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.actions import IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, SetEnvironmentVariable
+from launch import LaunchDescription
+import os
 from ament_index_python.packages import get_package_share_directory
 
 
 def generate_launch_description():
-    """Builds a LaunchDescription for the TF Server app"""
+    """Builds a LaunchDescription for the DUA TF Server app."""
     ld = LaunchDescription()
 
-    # Build config file path
+    # Get config files
     config = os.path.join(
         get_package_share_directory('dua_tf_server'),
         'config',
@@ -45,29 +44,33 @@ def generate_launch_description():
     )
 
     # Declare launch arguments
-    ns = LaunchConfiguration('namespace')
     cf = LaunchConfiguration('cf')
-    ns_launch_arg = DeclareLaunchArgument(
-        'namespace',
-        default_value='')
     cf_launch_arg = DeclareLaunchArgument(
         'cf',
         default_value=config)
-    ld.add_action(ns_launch_arg)
     ld.add_action(cf_launch_arg)
 
-    # Create node launch description
-    node = Node(
-        package='dua_tf_server',
-        executable='dua_tf_server_app',
-        namespace=ns,
+    # Launch the DUA TF Server container
+    container = ComposableNodeContainer(
+        name='container',
+        namespace='',
+        package='dua_app_management',
+        executable='dua_component_container_mt',
         emulate_tty=True,
         output='both',
         log_cmd=True,
-        parameters=[cf],
-        arguments=['--ros-args', '--log-level', 'info']
+        arguments=['--ros-args', '--log-level', 'info'],
+        composable_node_descriptions=[
+            # DUA tf server node
+            ComposableNode(
+                package='dua_tf_server',
+                plugin='dua_tf_server::TFServerNode',
+                name='dua_tf_server',
+                namespace='',
+                parameters=[cf],
+                extra_arguments=[{'use_intra_process_comms': True}]),
+        ],
     )
-
-    ld.add_action(node)
+    ld.add_action(container)
 
     return ld
