@@ -142,6 +142,12 @@ private:
   // #####################################  Internal methods  ######################################
   /**
    * @brief Gets the transform between from a source frame to a target frame.
+   *
+   * @param source_frame Source frame.
+   * @param target_frame Target frame.
+   * @param time Time at which the transform is requested.
+   * @param timeout Timeout for the request.
+   * @param transform Transform between the source and target frame.
    */
   bool get_transform(
     const std::string & source_frame, const std::string & target_frame,
