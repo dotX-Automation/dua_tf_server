@@ -68,7 +68,7 @@ public:
    * @brief Destructor.
    */
   ~TFServerNode() = default;
-  
+
   /**
    * @brief Gets the topic name for a source-target frame pair.
    */
