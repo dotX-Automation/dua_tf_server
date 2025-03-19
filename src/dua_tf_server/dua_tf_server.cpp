@@ -65,22 +65,10 @@ void TFServerNode::init_publishers()
 {
   // Initialize a publisher for each source-target frame pair
   for (size_t i = 0; i < source_frames_.size(); i++) {
-    // Get the source frame name
-    std::string source_frame = source_frames_[i];
-    size_t source_pos = source_frames_[i].find_last_of("/");
-    if (source_pos != std::string::npos) {
-      source_frame = source_frames_[i].substr(source_pos + 1);
-    }
-    // Get the target frame name
-    std::string target_frame = target_frames_[i];
-    size_t target_pos = target_frames_[i].find_last_of("/");
-    if (target_pos != std::string::npos) {
-      target_frame = target_frames_[i].substr(target_pos + 1);
-    }
-    // Initialize the publisher
+    std::string topic_name;
+    get_topic_name(source_frames_[i], target_frames_[i], topic_name);
     pose_pubs_.push_back(dua_create_publisher<PoseStamped>(
-      "~/" + source_frame + "_in_" + target_frame,
-      dua_qos::Reliable::get_datum_qos()));
+      topic_name, dua_qos::Reliable::get_datum_qos()));
   }
 }
 
