@@ -68,6 +68,29 @@ public:
    * @brief Destructor.
    */
   ~TFServerNode() = default;
+  
+  /**
+   * @brief Gets the topic name for a source-target frame pair.
+   */
+  static void get_topic_name(
+    const std::string & source_frame, const std::string & target_frame,
+    std::string & topic_name)
+  {
+    // Get the source frame name
+    std::string source_name = source_frame;
+    size_t source_pos = source_frame.find_last_of("/");
+    if (source_pos != std::string::npos) {
+      source_name = source_frame.substr(source_pos + 1);
+    }
+    // Get the target frame name
+    std::string target_name = target_frame;
+    size_t target_pos = target_frame.find_last_of("/");
+    if (target_pos != std::string::npos) {
+      target_name = target_frame.substr(target_pos + 1);
+    }
+    // Set the topic name
+    topic_name = "~/" + source_name + "_in_" + target_name;
+  }
 
 private:
   // ######################################  Parameters  ###########################################
@@ -140,29 +163,6 @@ private:
     TransformPose::Response::SharedPtr resp);
 
   // #####################################  Internal methods  ######################################
-  /**
-   * @brief Gets the topic name for a source-target frame pair.
-   */
-  static void get_topic_name(
-    const std::string & source_frame, const std::string & target_frame,
-    std::string & topic_name)
-  {
-    // Get the source frame name
-    std::string source_name = source_frame;
-    size_t source_pos = source_frame.find_last_of("/");
-    if (source_pos != std::string::npos) {
-      source_name = source_frame.substr(source_pos + 1);
-    }
-    // Get the target frame name
-    std::string target_name = target_frame;
-    size_t target_pos = target_frame.find_last_of("/");
-    if (target_pos != std::string::npos) {
-      target_name = target_frame.substr(target_pos + 1);
-    }
-    // Set the topic name
-    topic_name = "~/" + source_name + "_in_" + target_name;
-  }
-
   /**
    * @brief Gets the transform between from a source frame to a target frame.
    *
