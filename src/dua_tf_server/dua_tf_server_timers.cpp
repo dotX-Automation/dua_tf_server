@@ -40,8 +40,7 @@ void TFServerNode::publish_poses()
     {
       // Publish the pose of the source frame in the target frame
       PoseStamped pose_msg;
-      pose_msg.header.set__stamp(transform_msg.header.stamp);
-      pose_msg.header.set__frame_id(target_frame);
+      pose_msg.set__header(transform_msg.header);
       pose_msg.pose.position.set__x(transform_msg.transform.translation.x);
       pose_msg.pose.position.set__y(transform_msg.transform.translation.y);
       pose_msg.pose.position.set__z(transform_msg.transform.translation.z);
