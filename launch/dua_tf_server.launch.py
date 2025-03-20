@@ -44,33 +44,28 @@ def generate_launch_description():
     )
 
     # Declare launch arguments
+    ns = LaunchConfiguration('namespace')
     cf = LaunchConfiguration('cf')
+    ns_launch_arg = DeclareLaunchArgument(
+        'namespace',
+        default_value='')
     cf_launch_arg = DeclareLaunchArgument(
         'cf',
         default_value=config)
+    ld.add_action(ns_launch_arg)
     ld.add_action(cf_launch_arg)
 
-    # Launch the DUA TF Server container
-    container = ComposableNodeContainer(
-        name='container',
-        namespace='',
-        package='dua_app_management',
-        executable='dua_component_container_mt',
+    # Create node launch description
+    node = Node(
+        package='dua_tf_server',
+        executable='dua_tf_server_app',
+        namespace=ns,
         emulate_tty=True,
         output='both',
         log_cmd=True,
-        arguments=['--ros-args', '--log-level', 'info'],
-        composable_node_descriptions=[
-            # DUA tf server node
-            ComposableNode(
-                package='dua_tf_server',
-                plugin='dua_tf_server::TFServerNode',
-                name='dua_tf_server',
-                namespace='',
-                parameters=[cf],
-                extra_arguments=[{'use_intra_process_comms': True}]),
-        ],
+        parameters=[cf],
+        arguments=['--ros-args', '--log-level', 'info']
     )
-    ld.add_action(container)
+    ld.add_action(node)
 
     return ld

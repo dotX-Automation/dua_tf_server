@@ -4,6 +4,6 @@
     use_sim_time: false
     pose_period: 100
     source_frames:
-      - dottorcane/base_link
+      - base_link
     target_frames:
       - map
