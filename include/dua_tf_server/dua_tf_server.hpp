@@ -69,24 +69,78 @@ public:
    */
   ~TFServerNode() = default;
 
+  /**
+   * @brief Gets the topic name for a source-target frame pair.
+   */
+  static void get_topic_name(
+    const std::string & source_frame, const std::string & target_frame,
+    std::string & topic_name)
+  {
+    // Get the source frame name
+    std::string source_name = source_frame;
+    size_t source_pos = source_frame.find_last_of("/");
+    if (source_pos != std::string::npos) {
+      source_name = source_frame.substr(source_pos + 1);
+    }
+    // Get the target frame name
+    std::string target_name = target_frame;
+    size_t target_pos = target_frame.find_last_of("/");
+    if (target_pos != std::string::npos) {
+      target_name = target_frame.substr(target_pos + 1);
+    }
+    // Set the topic name
+    topic_name = source_name + "_in_" + target_name;
+  }
+
 private:
+  // ######################################  Parameters  ###########################################
+  int64_t pose_period_;
+  std::vector<std::string> source_frames_, target_frames_;
+
+  /**
+   * @brief Initializes parameters.
+   */
+  void init_parameters() override;
+
+  // ######################################  Callback groups  ######################################
+  rclcpp::CallbackGroup::SharedPtr pose_cgroup_;
+  rclcpp::CallbackGroup::SharedPtr get_transform_cgroup_;
+  rclcpp::CallbackGroup::SharedPtr transform_pose_cgroup_;
+
   /**
    * @brief Initializes callback groups.
    */
   void init_cgroups() override;
 
+  // ##########################################  Timers  ###########################################
+  rclcpp::TimerBase::SharedPtr pose_timer_;
+
+  /**
+   * @brief Initializes timers.
+   */
+  void init_timers() override;
+
+  /**
+   * @brief Iterates over the list of source and target frames and publishes the poses.
+   */
+  void publish_poses();
+
+  // #####################################  Topic publishers  ######################################
+  std::vector<rclcpp::Publisher<PoseStamped>::SharedPtr> pose_pubs_;
+
+  /**
+   * @brief Initializes publishers.
+   */
+  void init_publishers() override;
+
+  // ######################################  Service servers  ######################################
+  rclcpp::Service<GetTransform>::SharedPtr get_transform_srv_;
+  rclcpp::Service<TransformPose>::SharedPtr transform_pose_srv_;
+
   /**
    * @brief Initializes service servers.
    */
   void init_service_servers() override;
-
-  /* Callback groups */
-  rclcpp::CallbackGroup::SharedPtr get_transform_cgroup_;
-  rclcpp::CallbackGroup::SharedPtr transform_pose_cgroup_;
-
-  /* Service servers */
-  rclcpp::Service<GetTransform>::SharedPtr get_transform_srv_;
-  rclcpp::Service<TransformPose>::SharedPtr transform_pose_srv_;
 
   /**
    * @brief Gets the transform between from a source frame to a target frame.
@@ -108,7 +162,22 @@ private:
     TransformPose::Request::SharedPtr req,
     TransformPose::Response::SharedPtr resp);
 
-  /* Internal variables */
+  // #####################################  Internal methods  ######################################
+  /**
+   * @brief Gets the transform between from a source frame to a target frame.
+   *
+   * @param source_frame Source frame.
+   * @param target_frame Target frame.
+   * @param time Time at which the transform is requested.
+   * @param timeout Timeout for the request.
+   * @param transform Transform between the source and target frame.
+   */
+  bool get_transform(
+    const std::string & source_frame, const std::string & target_frame,
+    const rclcpp::Time & time, const rclcpp::Duration & timeout,
+    TransformStamped & transform);
+
+  // ####################################  Internal variables  #####################################
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 };

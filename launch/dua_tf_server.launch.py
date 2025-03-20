@@ -23,21 +23,20 @@ limitations under the License.
 """
 
 
-import os
-from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, SetEnvironmentVariable
-from launch_ros.actions import Node
+from launch_ros.descriptions import ComposableNode
+from launch_ros.actions import ComposableNodeContainer, Node
 from launch.substitutions import LaunchConfiguration
-from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.actions import IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, SetEnvironmentVariable
+from launch import LaunchDescription
+import os
 from ament_index_python.packages import get_package_share_directory
 
 
 def generate_launch_description():
-    """Builds a LaunchDescription for the TF Server app"""
+    """Builds a LaunchDescription for the DUA TF Server app."""
     ld = LaunchDescription()
 
-    # Build config file path
+    # Get config files
     config = os.path.join(
         get_package_share_directory('dua_tf_server'),
         'config',
@@ -67,7 +66,6 @@ def generate_launch_description():
         parameters=[cf],
         arguments=['--ros-args', '--log-level', 'info']
     )
-
     ld.add_action(node)
 
     return ld

@@ -1,0 +1,31 @@
+header_include_path: dua_tf_server/dua_tf_server.hpp
+namespace: dua_tf_server
+node_class_name: TFServerNode
+
+params:
+  pose_period:
+    type: integer
+    default_value: 100
+    min_value: 0
+    max_value: 1000
+    step: 1
+    description: Period in milliseconds for publishing the poses
+    constraints: Must be a positive number
+    read_only: true
+    var_name: pose_period_
+
+  source_frames:
+    type: string_array
+    default_value: []
+    description: List of source frames
+    constraints: Must be a list of strings
+    read_only: true
+    var_name: source_frames_
+
+  target_frames:
+    type: string_array
+    default_value: []
+    description: List of target frames
+    constraints: Must be a list of strings
+    read_only: true
+    var_name: target_frames_
