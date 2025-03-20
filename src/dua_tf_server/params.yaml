@@ -22,7 +22,7 @@ params:
     read_only: true
     var_name: source_frames_
 
-  target_frame:
+  target_frames:
     type: string_array
     default_value: []
     description: List of target frames

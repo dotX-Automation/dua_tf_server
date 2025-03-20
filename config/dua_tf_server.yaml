@@ -6,6 +6,6 @@
     source_frames:
       - dottorcane/odom
       - dottorcane/base_link
-    target_frame:
+    target_frames:
       - map
       - map
