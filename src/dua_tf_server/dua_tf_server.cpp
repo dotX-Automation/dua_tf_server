@@ -67,8 +67,10 @@ void TFServerNode::init_publishers()
   for (size_t i = 0; i < source_frames_.size(); i++) {
     std::string topic_name;
     get_topic_name(source_frames_[i], target_frames_[i], topic_name);
-    pose_pubs_.push_back(dua_create_publisher<PoseStamped>(
-      topic_name, dua_qos::Reliable::get_datum_qos()));
+    pose_pubs_.push_back(
+      dua_create_publisher<PoseStamped>(
+        "~/" + topic_name,
+        dua_qos::Reliable::get_datum_qos()));
   }
 }
 

@@ -89,7 +89,7 @@ public:
       target_name = target_frame.substr(target_pos + 1);
     }
     // Set the topic name
-    topic_name = "~/" + source_name + "_in_" + target_name;
+    topic_name = source_name + "_in_" + target_name;
   }
 
 private:
