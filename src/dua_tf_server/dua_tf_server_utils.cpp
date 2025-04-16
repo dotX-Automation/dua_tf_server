@@ -37,9 +37,11 @@ bool TFServerNode::get_transform(
       target_frame, source_frame, time, timeout);
     return true;
   } catch (const tf2::TransformException & ex) {
-    RCLCPP_ERROR(
-      get_logger(), "Failed to get transform from %s to %s at %f",
-      source_frame.c_str(), target_frame.c_str(), time.seconds());
+    RCLCPP_ERROR_THROTTLE(
+      get_logger(), *get_clock(), 1000,
+      "Failed to get transform from %s to %s at %f: %s",
+      source_frame.c_str(), target_frame.c_str(), time.seconds(),
+      ex.what());
     return false;
   }
 }
