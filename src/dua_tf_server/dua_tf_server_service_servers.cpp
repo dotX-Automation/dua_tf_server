@@ -31,84 +31,44 @@ void TFServerNode::get_transform_callback(
   GetTransform::Request::SharedPtr req,
   GetTransform::Response::SharedPtr resp)
 {
-  const std::string & source_frame = req->source_frame;
-  const std::string & target_frame = req->target_frame;
-  const rclcpp::Duration & timeout = req->timeout;
-  if (get_transform(source_frame, target_frame, req->time, timeout, resp->transform)) {
-    resp->result.set__result(CommandResultStamped::SUCCESS);
-  } else {
-    if (get_transform(source_frame, target_frame, rclcpp::Time(), timeout, resp->transform)) {
-      resp->result.set__result(CommandResultStamped::FAILED);
-    } else {
-      resp->result.set__result(CommandResultStamped::ERROR);
-    }
-  }
-}
+  // Parse the request
+  const rclcpp::Time source_time(req->source.stamp);
+  const rclcpp::Time target_time(req->target.stamp);
+  const std::string & source_frame = req->source.frame_id;
+  const std::string & target_frame = req->target.frame_id;
+  const rclcpp::Duration timeout = req->timeout;
 
-void TFServerNode::get_temporal_transform_callback(
-  GetTemporalTransform::Request::SharedPtr req,
-  GetTemporalTransform::Response::SharedPtr resp)
-{
-  // Get the transform from the source frame to the map frame at the source time
-  TransformStamped source_tf_msg;
-  if (get_transform(req->source.frame_id, "map", req->source.stamp, req->timeout, source_tf_msg)) {
-    resp->result.set__result(CommandResultStamped::SUCCESS);
-  } else {
-    if (get_transform(req->source.frame_id, "map", rclcpp::Time(), req->timeout, source_tf_msg)) {
-      resp->result.set__result(CommandResultStamped::FAILED);
-    } else {
-      resp->result.set__result(CommandResultStamped::ERROR);
-      return;
-    }
-  }
-
-  // Get the transform from the target frame to the map frame at the target time
-  TransformStamped target_tf_msg;
-  if (get_transform(req->target.frame_id, "map", req->target.stamp, req->timeout, target_tf_msg)) {
-    resp->result.set__result(CommandResultStamped::SUCCESS);
-  } else {
-    if (get_transform(req->target.frame_id, "map", rclcpp::Time(), req->timeout, target_tf_msg)) {
-      resp->result.set__result(CommandResultStamped::FAILED);
-    } else {
-      resp->result.set__result(CommandResultStamped::ERROR);
-      return;
-    }
-  }
-
-  // Compose the transform from the source frame to the target frame
-  tf2::Transform source_tf, target_tf;
-  tf2::fromMsg(source_tf_msg.transform, source_tf);
-  tf2::fromMsg(target_tf_msg.transform, target_tf);
-  tf2::Transform final_tf = target_tf.inverse() * source_tf;
-
-  // Populate the transform message
-  resp->transform.header.set__stamp(req->target.stamp);
-  resp->transform.header.set__frame_id(req->target.frame_id);
-  resp->transform.set__child_frame_id(req->source.frame_id);
-  resp->transform.set__transform(tf2::toMsg(final_tf));
+  // Get the transform
+  compute_transform(
+    source_time, source_frame, target_time, target_frame, timeout,
+    resp->result.result, resp->transform);
 }
 
 void TFServerNode::transform_pose_callback(
   TransformPose::Request::SharedPtr req,
   TransformPose::Response::SharedPtr resp)
 {
+  // Parse the request
+  const rclcpp::Time source_time(req->source_pose.header.stamp);
+  const rclcpp::Time target_time(req->target.stamp);
   const std::string & source_frame = req->source_pose.header.frame_id;
-  const std::string & target_frame = req->target_frame;
-  const rclcpp::Duration & timeout = req->timeout;
-  TransformStamped transform_msg;
-  if (get_transform(source_frame, target_frame, req->source_pose.header.stamp, timeout,
-      transform_msg))
-  {
-    resp->result.set__result(CommandResultStamped::SUCCESS);
+  const std::string & target_frame = req->target.frame_id;
+  const rclcpp::Duration timeout = req->timeout;
+
+  // Get the transform
+  CommandResultStamped::_result_type result;
+  geometry_msgs::msg::TransformStamped tf_msg;
+  compute_transform(
+    source_time, source_frame, target_time, target_frame, timeout,
+    result, tf_msg);
+
+  // Transform the pose
+  if (result == CommandResultStamped::SUCCESS) {
+    tf2::doTransform(req->source_pose, resp->target_pose, tf_msg);
+    resp->result.result = CommandResultStamped::SUCCESS;
   } else {
-    if (get_transform(source_frame, target_frame, rclcpp::Time(), timeout, transform_msg)) {
-      resp->result.set__result(CommandResultStamped::FAILED);
-    } else {
-      resp->result.set__result(CommandResultStamped::ERROR);
-      return;
-    }
+    resp->result.result = result;
   }
-  tf2::doTransform(req->source_pose, resp->target_pose, transform_msg);
 }
 
 } // namespace dua_tf_server

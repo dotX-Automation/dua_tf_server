@@ -91,16 +91,6 @@ void TFServerNode::init_service_servers()
       std::placeholders::_2),
     get_transform_cgroup_);
 
-  // Create the GetTemporalTransform service server
-  get_temporal_transform_srv_ = dua_create_service_server<GetTemporalTransform>(
-    "~/get_temporal_transform",
-    std::bind(
-      &TFServerNode::get_temporal_transform_callback,
-      this,
-      std::placeholders::_1,
-      std::placeholders::_2),
-    get_temporal_transform_cgroup_);
-
   // Create the TransformPose service server
   transform_pose_srv_ = dua_create_service_server<TransformPose>(
     "~/transform_pose",

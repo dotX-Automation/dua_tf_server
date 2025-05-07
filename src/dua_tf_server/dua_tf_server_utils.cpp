@@ -35,7 +35,6 @@ bool TFServerNode::get_transform(
   try {
     transform = tf_buffer_->lookupTransform(
       target_frame, source_frame, time, timeout);
-    return true;
   } catch (const tf2::TransformException & ex) {
     RCLCPP_ERROR_THROTTLE(
       get_logger(), *get_clock(), 1000,
@@ -43,6 +42,67 @@ bool TFServerNode::get_transform(
       source_frame.c_str(), target_frame.c_str(), time.seconds(),
       ex.what());
     return false;
+  }
+  return true;
+}
+
+void TFServerNode::compute_transform(
+  const rclcpp::Time & source_time,
+  const std::string & source_frame,
+  const rclcpp::Time & target_time,
+  const std::string & target_frame,
+  const rclcpp::Duration & timeout,
+  CommandResultStamped::_result_type & result,
+  geometry_msgs::msg::TransformStamped & tf_msg)
+{
+  // If the time stamps are equal, get the transform directly
+  result = CommandResultStamped::SUCCESS;
+  const rclcpp::Duration tolerance = rclcpp::Duration::from_nanoseconds(1e6); // 1ms
+  if (std::abs((target_time - source_time).nanoseconds()) <= tolerance.nanoseconds()) {
+    // Get the transform from the source frame to the target frame at the target time
+    if (!get_transform(source_frame, target_frame, target_time, timeout, tf_msg)) {
+      // If the transform is not available, try to get it at the current time
+      if (get_transform(source_frame, target_frame, rclcpp::Time(), timeout, tf_msg)) {
+        result = CommandResultStamped::FAILED;
+      } else {
+        result = CommandResultStamped::ERROR;
+      }
+    }
+  }
+  // If the time stamps are not equal, use a fixed frame
+  else {
+    // Get the transform from the source frame to map at the source time
+    TransformStamped source_tf_msg;
+    if (!get_transform(source_frame, "map", source_time, timeout, source_tf_msg)) {
+      // If the transform is not available, try to get it at the current time
+      if (get_transform(source_frame, "map", rclcpp::Time(), timeout, source_tf_msg)) {
+        result = CommandResultStamped::FAILED;
+      } else {
+        result = CommandResultStamped::ERROR;
+        return;
+      }
+    }
+    // Get the transform from the target frame to the map frame at the target time
+    TransformStamped target_tf_msg;
+    if (!get_transform(target_frame, "map", target_time, timeout, target_tf_msg)) {
+      // If the transform is not available, try to get it at the current time
+      if (get_transform(target_frame, "map", rclcpp::Time(), timeout, target_tf_msg)) {
+        result = CommandResultStamped::FAILED;
+      } else {
+        result = CommandResultStamped::ERROR;
+        return;
+      }
+    }
+    // Compose the transform from the source frame to the target frame
+    tf2::Transform source_tf, target_tf;
+    tf2::fromMsg(source_tf_msg.transform, source_tf);
+    tf2::fromMsg(target_tf_msg.transform, target_tf);
+    tf2::Transform final_tf = target_tf.inverse() * source_tf;
+    // Populate the transform message
+    tf_msg.header.set__stamp(target_time);
+    tf_msg.header.set__frame_id(target_frame);
+    tf_msg.set__child_frame_id(source_frame);
+    tf_msg.set__transform(tf2::toMsg(final_tf));
   }
 }
 

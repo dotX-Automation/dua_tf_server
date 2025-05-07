@@ -147,7 +147,7 @@ private:
   void init_service_servers() override;
 
   /**
-   * @brief Gets the transform between from a source frame to a target frame.
+   * @brief Gets the transform from a source frame to a target frame.
    *
    * @param req Request.
    * @param resp Response.
@@ -155,16 +155,6 @@ private:
   void get_transform_callback(
     GetTransform::Request::SharedPtr req,
     GetTransform::Response::SharedPtr resp);
-
-  /**
-   * @brief Gets the transform between a source frame at one time to a target frame at another time.
-   *
-   * @param req Request.
-   * @param resp Response.
-   */
-  void get_temporal_transform_callback(
-    GetTemporalTransform::Request::SharedPtr req,
-    GetTemporalTransform::Response::SharedPtr resp);
 
   /**
    * @brief Transforms a pose from a source frame to a target frame.
@@ -178,7 +168,7 @@ private:
 
   // #####################################  Internal methods  ######################################
   /**
-   * @brief Gets the transform between from a source frame to a target frame.
+   * @brief Gets the transform between a source frame and a target frame.
    *
    * @param source_frame Source frame.
    * @param target_frame Target frame.
@@ -190,6 +180,23 @@ private:
     const std::string & source_frame, const std::string & target_frame,
     const rclcpp::Time & time, const rclcpp::Duration & timeout,
     TransformStamped & transform);
+
+  /**
+   * @brief Computes the transform between a source frame and a target frame.
+   *
+   * @param source_time Time at which the source frame is requested.
+   * @param source_frame Source frame.
+   * @param target_time Time at which the target frame is requested.
+   * @param target_frame Target frame.
+   * @param timeout Timeout for the request.
+   * @param result Result of the request.
+   * @param tf_msg Transform between the source and target frame.
+   */
+  void compute_transform(
+    const rclcpp::Time & source_time, const std::string & source_frame,
+    const rclcpp::Time & target_time, const std::string & target_frame,
+    const rclcpp::Duration & timeout, CommandResultStamped::_result_type & result,
+    geometry_msgs::msg::TransformStamped & tf_msg);
 
   // ####################################  Internal variables  #####################################
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
