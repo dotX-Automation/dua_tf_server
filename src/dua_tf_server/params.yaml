@@ -3,6 +3,14 @@ namespace: dua_tf_server
 node_class_name: TFServerNode
 
 params:
+  fixed_frame:
+    type: string
+    default_value: "map"
+    description: "The fixed frame w.r.t. which to compute transforms at different times."
+    constraints: "Must be the valid name of a fixed, existing frame."
+    read_only: true
+    var_name: fixed_frame_
+
   pose_period:
     type: integer
     default_value: 0
