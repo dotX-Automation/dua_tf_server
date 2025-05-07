@@ -45,6 +45,49 @@ void TFServerNode::get_transform_callback(
   }
 }
 
+void TFServerNode::get_temporal_transform_callback(
+  GetTemporalTransform::Request::SharedPtr req,
+  GetTemporalTransform::Response::SharedPtr resp)
+{
+  // Get the transform from the source frame to the map frame at the source time
+  TransformStamped source_tf_msg;
+  if (get_transform(req->source.frame_id, "map", req->source.stamp, req->timeout, source_tf_msg)) {
+    resp->result.set__result(CommandResultStamped::SUCCESS);
+  } else {
+    if (get_transform(req->source.frame_id, "map", rclcpp::Time(), req->timeout, source_tf_msg)) {
+      resp->result.set__result(CommandResultStamped::FAILED);
+    } else {
+      resp->result.set__result(CommandResultStamped::ERROR);
+      return;
+    }
+  }
+
+  // Get the transform from the target frame to the map frame at the target time
+  TransformStamped target_tf_msg;
+  if (get_transform(req->target.frame_id, "map", req->target.stamp, req->timeout, target_tf_msg)) {
+    resp->result.set__result(CommandResultStamped::SUCCESS);
+  } else {
+    if (get_transform(req->target.frame_id, "map", rclcpp::Time(), req->timeout, target_tf_msg)) {
+      resp->result.set__result(CommandResultStamped::FAILED);
+    } else {
+      resp->result.set__result(CommandResultStamped::ERROR);
+      return;
+    }
+  }
+
+  // Compose the transform from the source frame to the target frame
+  tf2::Transform source_tf, target_tf;
+  tf2::fromMsg(source_tf_msg.transform, source_tf);
+  tf2::fromMsg(target_tf_msg.transform, target_tf);
+  tf2::Transform final_tf = target_tf.inverse() * source_tf;
+
+  // Populate the transform message
+  resp->transform.header.set__stamp(req->target.stamp);
+  resp->transform.header.set__frame_id(req->target.frame_id);
+  resp->transform.set__child_frame_id(req->source.frame_id);
+  resp->transform.set__transform(tf2::toMsg(final_tf));
+}
+
 void TFServerNode::transform_pose_callback(
   TransformPose::Request::SharedPtr req,
   TransformPose::Response::SharedPtr resp)

@@ -36,6 +36,7 @@
 #include <geometry_msgs/msg/transform_stamped.hpp>
 
 #include <dua_geometry_interfaces/srv/get_transform.hpp>
+#include <dua_geometry_interfaces/srv/get_temporal_transform.hpp>
 #include <dua_geometry_interfaces/srv/transform_pose.hpp>
 
 #define UNUSED(arg) (void)(arg)
@@ -49,6 +50,7 @@ using geometry_msgs::msg::PoseStamped;
 using geometry_msgs::msg::TransformStamped;
 
 using dua_geometry_interfaces::srv::GetTransform;
+using dua_geometry_interfaces::srv::GetTemporalTransform;
 using dua_geometry_interfaces::srv::TransformPose;
 
 /**
@@ -105,6 +107,7 @@ private:
   // ######################################  Callback groups  ######################################
   rclcpp::CallbackGroup::SharedPtr pose_cgroup_;
   rclcpp::CallbackGroup::SharedPtr get_transform_cgroup_;
+  rclcpp::CallbackGroup::SharedPtr get_temporal_transform_cgroup_;
   rclcpp::CallbackGroup::SharedPtr transform_pose_cgroup_;
 
   /**
@@ -135,6 +138,7 @@ private:
 
   // ######################################  Service servers  ######################################
   rclcpp::Service<GetTransform>::SharedPtr get_transform_srv_;
+  rclcpp::Service<GetTemporalTransform>::SharedPtr get_temporal_transform_srv_;
   rclcpp::Service<TransformPose>::SharedPtr transform_pose_srv_;
 
   /**
@@ -151,6 +155,16 @@ private:
   void get_transform_callback(
     GetTransform::Request::SharedPtr req,
     GetTransform::Response::SharedPtr resp);
+
+  /**
+   * @brief Gets the transform between a source frame at one time to a target frame at another time.
+   *
+   * @param req Request.
+   * @param resp Response.
+   */
+  void get_temporal_transform_callback(
+    GetTemporalTransform::Request::SharedPtr req,
+    GetTemporalTransform::Response::SharedPtr resp);
 
   /**
    * @brief Transforms a pose from a source frame to a target frame.
