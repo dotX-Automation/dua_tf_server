@@ -24,6 +24,9 @@
 
 #pragma once
 
+#include <string>
+#include <vector>
+
 #include <dua_node_cpp/dua_node.hpp>
 #include <dua_qos_cpp/dua_qos.hpp>
 
@@ -36,7 +39,6 @@
 #include <geometry_msgs/msg/transform_stamped.hpp>
 
 #include <dua_geometry_interfaces/srv/get_transform.hpp>
-#include <dua_geometry_interfaces/srv/get_temporal_transform.hpp>
 #include <dua_geometry_interfaces/srv/transform_pose.hpp>
 
 #define UNUSED(arg) (void)(arg)
@@ -50,7 +52,6 @@ using geometry_msgs::msg::PoseStamped;
 using geometry_msgs::msg::TransformStamped;
 
 using dua_geometry_interfaces::srv::GetTransform;
-using dua_geometry_interfaces::srv::GetTemporalTransform;
 using dua_geometry_interfaces::srv::TransformPose;
 
 /**
@@ -98,6 +99,7 @@ private:
   // ######################################  Parameters  ###########################################
   int64_t pose_period_;
   std::vector<std::string> source_frames_, target_frames_;
+  std::string fixed_frame_;
 
   /**
    * @brief Initializes parameters.
@@ -107,7 +109,6 @@ private:
   // ######################################  Callback groups  ######################################
   rclcpp::CallbackGroup::SharedPtr pose_cgroup_;
   rclcpp::CallbackGroup::SharedPtr get_transform_cgroup_;
-  rclcpp::CallbackGroup::SharedPtr get_temporal_transform_cgroup_;
   rclcpp::CallbackGroup::SharedPtr transform_pose_cgroup_;
 
   /**
@@ -138,7 +139,6 @@ private:
 
   // ######################################  Service servers  ######################################
   rclcpp::Service<GetTransform>::SharedPtr get_transform_srv_;
-  rclcpp::Service<GetTemporalTransform>::SharedPtr get_temporal_transform_srv_;
   rclcpp::Service<TransformPose>::SharedPtr transform_pose_srv_;
 
   /**

@@ -48,7 +48,6 @@ void TFServerNode::init_cgroups()
 {
   pose_cgroup_ = dua_create_reentrant_cgroup();
   get_transform_cgroup_ = dua_create_reentrant_cgroup();
-  get_temporal_transform_cgroup_ = dua_create_reentrant_cgroup();
   transform_pose_cgroup_ = dua_create_reentrant_cgroup();
 }
 

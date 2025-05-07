@@ -71,33 +71,35 @@ void TFServerNode::compute_transform(
   }
   // If the time stamps are not equal, use a fixed frame
   else {
-    // Get the transform from the source frame to map at the source time
+    // Get the transform from the source frame to fixed at the source time
     TransformStamped source_tf_msg;
-    if (!get_transform(source_frame, "map", source_time, timeout, source_tf_msg)) {
+    if (!get_transform(source_frame, fixed_frame_, source_time, timeout, source_tf_msg)) {
       // If the transform is not available, try to get it at the current time
-      if (get_transform(source_frame, "map", rclcpp::Time(), timeout, source_tf_msg)) {
+      if (get_transform(source_frame, fixed_frame_, rclcpp::Time(), timeout, source_tf_msg)) {
         result = CommandResultStamped::FAILED;
       } else {
         result = CommandResultStamped::ERROR;
         return;
       }
     }
-    // Get the transform from the target frame to the map frame at the target time
+    // Get the transform from the target frame to the fixed frame at the target time
     TransformStamped target_tf_msg;
-    if (!get_transform(target_frame, "map", target_time, timeout, target_tf_msg)) {
+    if (!get_transform(target_frame, fixed_frame_, target_time, timeout, target_tf_msg)) {
       // If the transform is not available, try to get it at the current time
-      if (get_transform(target_frame, "map", rclcpp::Time(), timeout, target_tf_msg)) {
+      if (get_transform(target_frame, fixed_frame_, rclcpp::Time(), timeout, target_tf_msg)) {
         result = CommandResultStamped::FAILED;
       } else {
         result = CommandResultStamped::ERROR;
         return;
       }
     }
+
     // Compose the transform from the source frame to the target frame
     tf2::Transform source_tf, target_tf;
     tf2::fromMsg(source_tf_msg.transform, source_tf);
     tf2::fromMsg(target_tf_msg.transform, target_tf);
     tf2::Transform final_tf = target_tf.inverse() * source_tf;
+
     // Populate the transform message
     tf_msg.header.set__stamp(target_time);
     tf_msg.header.set__frame_id(target_frame);
