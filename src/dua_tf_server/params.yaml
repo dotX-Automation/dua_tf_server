@@ -11,7 +11,7 @@ params:
     read_only: true
     var_name: fixed_frame_
 
-  pose_period:
+  poses_pub_period:
     type: integer
     default_value: 0
     min_value: 0
@@ -20,7 +20,7 @@ params:
     description: Period in milliseconds for publishing the poses
     constraints: Must be a positive number
     read_only: true
-    var_name: pose_period_
+    var_name: poses_pub_period_
 
   source_frames:
     type: string_array

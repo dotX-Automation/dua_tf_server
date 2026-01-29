@@ -46,7 +46,7 @@ TFServerNode::TFServerNode(const rclcpp::NodeOptions & node_options)
 
 void TFServerNode::init_cgroups()
 {
-  pose_cgroup_ = dua_create_reentrant_cgroup();
+  poses_cgroup_ = dua_create_exclusive_cgroup();
   get_transform_cgroup_ = dua_create_reentrant_cgroup();
   transform_pose_cgroup_ = dua_create_reentrant_cgroup();
 }
@@ -54,19 +54,19 @@ void TFServerNode::init_cgroups()
 void TFServerNode::init_timers()
 {
   // Create a timer to publish the poses only if needed
-  if (pose_period_ > 0 && source_frames_.size() > 0) {
-    pose_timer_ = dua_create_timer(
-      "Pose timer",
-      pose_period_,
+  if (poses_pub_period_ > 0 && source_frames_.size() > 0) {
+    poses_timer_ = dua_create_timer(
+      "Poses timer",
+      poses_pub_period_,
       std::bind(&TFServerNode::publish_poses, this),
-      pose_cgroup_);
+      poses_cgroup_);
   }
 }
 
 void TFServerNode::init_publishers()
 {
   // Create a publisher for each source-target frame pair only if needed
-  if (pose_period_ > 0 && source_frames_.size() > 0) {
+  if (poses_pub_period_ > 0 && source_frames_.size() > 0) {
     for (size_t i = 0; i < source_frames_.size(); i++) {
       std::string topic_name;
       get_topic_name(source_frames_[i], target_frames_[i], topic_name);

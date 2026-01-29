@@ -97,7 +97,7 @@ public:
 
 private:
   // ######################################  Parameters  ###########################################
-  int64_t pose_period_;
+  int64_t poses_pub_period_;
   std::vector<std::string> source_frames_, target_frames_;
   std::string fixed_frame_;
 
@@ -107,7 +107,7 @@ private:
   void init_parameters() override;
 
   // ######################################  Callback groups  ######################################
-  rclcpp::CallbackGroup::SharedPtr pose_cgroup_;
+  rclcpp::CallbackGroup::SharedPtr poses_cgroup_;
   rclcpp::CallbackGroup::SharedPtr get_transform_cgroup_;
   rclcpp::CallbackGroup::SharedPtr transform_pose_cgroup_;
 
@@ -117,7 +117,7 @@ private:
   void init_cgroups() override;
 
   // ##########################################  Timers  ###########################################
-  rclcpp::TimerBase::SharedPtr pose_timer_;
+  rclcpp::TimerBase::SharedPtr poses_timer_;
 
   /**
    * @brief Initializes timers.
