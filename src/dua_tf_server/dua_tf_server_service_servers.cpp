@@ -56,19 +56,17 @@ void TFServerNode::transform_pose_callback(
   const rclcpp::Duration timeout = req->timeout;
 
   // Get the transform
-  CommandResultStamped::_result_type result;
-  geometry_msgs::msg::TransformStamped tf_msg;
+  uint8_t result;
+  geometry_msgs::msg::TransformStamped tf_msg{};
   compute_transform(
     source_time, source_frame, target_time, target_frame, timeout,
     result, tf_msg);
 
-  // Transform the pose
-  if (result == CommandResultStamped::SUCCESS) {
+  // Transform the pose; this handles all the cases
+  if (result != CommandResultStamped::ERROR) {
     tf2::doTransform(req->source_pose, resp->target_pose, tf_msg);
-    resp->result.result = CommandResultStamped::SUCCESS;
-  } else {
-    resp->result.result = result;
   }
+  resp->result.result = result;
 }
 
 } // namespace dua_tf_server
